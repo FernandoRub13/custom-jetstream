@@ -22,6 +22,36 @@
             {{ $slot }}
         </div>
 
+        @if (config('services.recaptcha.enable'))
+        <script src="https://www.google.com/recaptcha/api.js?onload=handleRecaptchaLoad&render=explicit" async defer></script>
+        <script class="grecaptcha">
+            let captchaIds = ['loginCaptcha']
+            function handleRecaptchaLoad() {
+                captchaIds.forEach((captchaId, key) => {
+                    if (!document.getElementById(captchaId)) {
+                        return
+                    }
+
+                    window[`widget_captcha${key}`] = grecaptcha.render(
+                        captchaId, {
+                            'sitekey': '{{ config('services.recaptcha.site_key') }}'
+                        }
+                    )
+                })
+            }
+            window.addEventListener('reset-google-recaptcha', () => {
+                captchaIds.forEach((captchaId, key) => {
+                    if (!document.getElementById(captchaId)) {
+                        return
+                    }
+
+                    grecaptcha.reset(window[`widget_captcha${key}`], {
+                        'sitekey': '{{ config('services.recaptcha.site_key') }}'
+                    })
+                })
+            })
+        </script>
+        @endif
         @livewireScripts
     </body>
 </html>
